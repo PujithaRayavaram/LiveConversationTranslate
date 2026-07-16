@@ -21,3 +21,12 @@ Completed:
 Next:
 - Add microphone permission
 - Implement speech recognition
+
+## Version 0.2
+Date: 16-07-2026
+
+Completed:
+- Added RECORD_AUDIO permission
+- Implemented runtime microphone permission
+- Successfully received permission from Android
+
