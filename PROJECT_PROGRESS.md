@@ -39,3 +39,8 @@ Completed:
 - Start Translation button is functional
 
 Status: ✅ Completed
+
+## Version 0.4
+- Started ML Kit Translation
+- Added Google Translator dependency
+- Created TranslatorHelper.kt

@@ -1,5 +1,8 @@
 package com.example.liveconversationtranslate
 
+import android.speech.SpeechRecognizer
+import android.speech.RecognitionListener
+import com.example.liveconversationtranslate.translation.TranslatorHelper
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -27,6 +30,9 @@ class MainActivity : ComponentActivity() {
 
     private var speechText by mutableStateOf("Waiting for speech...")
 
+    private lateinit var speechRecognizer: SpeechRecognizer
+    private lateinit var speechIntent: Intent
+
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -47,7 +53,8 @@ class MainActivity : ComponentActivity() {
                     ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     ?.get(0)
                 if (spokenText != null) {
-                    speechText = spokenText
+                    val translator = TranslatorHelper()
+                    speechText = translator.translate(spokenText)
                     android.util.Log.d("SpeechDebug","Recognized: $spokenText")
                 }
 
@@ -67,6 +74,53 @@ class MainActivity : ComponentActivity() {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
 
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+
+        speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+        }
+
+        speechRecognizer.setRecognitionListener(object : RecognitionListener {
+
+            override fun onReadyForSpeech(params: Bundle?) {}
+
+            override fun onBeginningOfSpeech() {}
+
+            override fun onRmsChanged(rmsdB: Float) {}
+
+            override fun onBufferReceived(buffer: ByteArray?) {}
+
+            override fun onEndOfSpeech() {
+                speechRecognizer.startListening(speechIntent)
+            }
+
+            override fun onError(error: Int) {
+                if (error == SpeechRecognizer.ERROR_NO_MATCH ||
+                    error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                ) {
+                    speechRecognizer.startListening(speechIntent)
+                }
+            }
+
+            override fun onResults(results: Bundle?) {
+
+                val text = results
+                    ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    ?.get(0)
+
+                if (text != null) {
+                    speechText = text
+                }
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {}
+
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+
         setContent {
 
 
@@ -80,21 +134,11 @@ class MainActivity : ComponentActivity() {
                         speechText = speechText,
                         onStartTranslation = {
 
-                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                                speechRecognizer.startListening(speechIntent)
 
-                            intent.putExtra(
-                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                            )
-
-                            intent.putExtra(
-                                RecognizerIntent.EXTRA_PROMPT,
-                                "Speak now..."
-                            )
-
-                            speechRecognizerLauncher.launch(intent)
 
                         }
+
                     )
 
                 }
