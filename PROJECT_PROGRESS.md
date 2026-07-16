@@ -1,0 +1,23 @@
+# Live Conversation Translate
+
+## Project Goal
+Develop an Android application that can listen to live conversations and display translated text in the user's preferred language. The app will also support a floating overlay and Quick Settings tile for quick access.
+
+---
+
+## Progress Log
+
+### Version 0.1
+Date: 16-07-2026
+
+Completed:
+- Created Android Studio project
+- Created project architecture
+- Added packages
+- Created HomeScreen
+- Designed basic UI
+- Successfully ran application on emulator
+
+Next:
+- Add microphone permission
+- Implement speech recognition
