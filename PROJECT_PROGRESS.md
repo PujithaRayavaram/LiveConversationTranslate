@@ -30,3 +30,12 @@ Completed:
 - Implemented runtime microphone permission
 - Successfully received permission from Android
 
+## Version 0.3 - Completed ✅
+
+### Features
+- Added speech recognition
+- Microphone permission implemented
+- Recognized speech displayed on screen
+- Start Translation button is functional
+
+Status: ✅ Completed

@@ -1,5 +1,13 @@
 package com.example.liveconversationtranslate
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +25,8 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
 
+    private var speechText by mutableStateOf("Waiting for speech...")
+
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -25,6 +35,23 @@ class MainActivity : ComponentActivity() {
                 println("Microphone Permission Granted")
             } else {
                 println("Microphone Permission Denied")
+            }
+        }
+
+    private val speechRecognizerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
+            if (result.resultCode == RESULT_OK) {
+
+                val spokenText = result.data
+                    ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                    ?.get(0)
+                if (spokenText != null) {
+                    speechText = spokenText
+                    android.util.Log.d("SpeechDebug","Recognized: $spokenText")
+                }
+
+
             }
         }
 
@@ -41,13 +68,33 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+
+
             LiveConversationTranslateTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
 
                     HomeScreen(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        speechText = speechText,
+                        onStartTranslation = {
+
+                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+
+                            intent.putExtra(
+                                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                            )
+
+                            intent.putExtra(
+                                RecognizerIntent.EXTRA_PROMPT,
+                                "Speak now..."
+                            )
+
+                            speechRecognizerLauncher.launch(intent)
+
+                        }
                     )
 
                 }

@@ -10,8 +10,11 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    speechText: String,
+    onStartTranslation: () ->Unit
 ) {
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -32,14 +35,33 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        Button(onClick = { }) {
-            Text("Start Translation")
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = speechText,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Button(
+                // Speech Recognition will start here
+                onClick = onStartTranslation
+        ) {
+            Text("🎤 Start Translation")
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(onClick = { }) {
+        Button(
+            onClick = {
+                // Stop Listening
+            }
+        ) {
             Text("Stop")
         }
+
     }
 }
