@@ -40,7 +40,6 @@ android {
 }
 
 dependencies {
-    implementation("com.google.mlkit:translate:17.0.2")
     implementation("com.google.mlkit:translate:17.0.3")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

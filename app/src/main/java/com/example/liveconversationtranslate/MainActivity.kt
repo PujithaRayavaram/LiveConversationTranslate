@@ -1,8 +1,9 @@
 package com.example.liveconversationtranslate
 
+import com.example.liveconversationtranslate.language.LanguageRepository
 import android.speech.SpeechRecognizer
 import android.speech.RecognitionListener
-import com.example.liveconversationtranslate.translation.TranslatorHelper
+import com.example.liveconversationtranslate.translation.TranslatorManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -29,9 +30,16 @@ import androidx.core.content.ContextCompat
 class MainActivity : ComponentActivity() {
 
     private var speechText by mutableStateOf("Waiting for speech...")
+    private var selectedSourceLanguage by mutableStateOf(LanguageRepository.languages[0])
+    private var selectedTargetLanguage by mutableStateOf(LanguageRepository.languages[1])
+
+    private var translatedText by mutableStateOf("Translation will appear here...")
 
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var speechIntent: Intent
+    private var isListening = false
+
+    private val translatorManager = TranslatorManager()
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -41,24 +49,6 @@ class MainActivity : ComponentActivity() {
                 println("Microphone Permission Granted")
             } else {
                 println("Microphone Permission Denied")
-            }
-        }
-
-    private val speechRecognizerLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-
-            if (result.resultCode == RESULT_OK) {
-
-                val spokenText = result.data
-                    ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                    ?.get(0)
-                if (spokenText != null) {
-                    val translator = TranslatorHelper()
-                    speechText = translator.translate(spokenText)
-                    android.util.Log.d("SpeechDebug","Recognized: $spokenText")
-                }
-
-
             }
         }
 
@@ -94,11 +84,12 @@ class MainActivity : ComponentActivity() {
             override fun onBufferReceived(buffer: ByteArray?) {}
 
             override fun onEndOfSpeech() {
-                speechRecognizer.startListening(speechIntent)
+                if (isListening) {
+                    speechRecognizer.startListening(speechIntent)
+                }
             }
-
             override fun onError(error: Int) {
-                if (error == SpeechRecognizer.ERROR_NO_MATCH ||
+                if (isListening && error == SpeechRecognizer.ERROR_NO_MATCH ||
                     error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
                 ) {
                     speechRecognizer.startListening(speechIntent)
@@ -112,8 +103,24 @@ class MainActivity : ComponentActivity() {
                     ?.get(0)
 
                 if (text != null) {
+
                     speechText = text
+
+                    translatorManager.translate(
+                        text = text,
+                        sourceLanguage = selectedSourceLanguage.code,
+                        targetLanguage = selectedTargetLanguage.code,
+                        onSuccess = { translated ->
+                            translatedText = translated
+                        },
+                        onFailure = {
+                            translatedText = "Translation Failed"
+                        }
+                    )
+
                 }
+
+
             }
 
             override fun onPartialResults(partialResults: Bundle?) {}
@@ -132,11 +139,17 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(
                         modifier = Modifier.padding(innerPadding),
                         speechText = speechText,
+                        translatedText = translatedText,
+                        sourceLanguage = selectedSourceLanguage.name,
+                        targetLanguage = selectedTargetLanguage.name,
                         onStartTranslation = {
+                            isListening = true
 
                                 speechRecognizer.startListening(speechIntent)
-
-
+                        },
+                        onStopTranslation = {
+                            isListening = false
+                            speechRecognizer.stopListening()
                         }
 
                     )

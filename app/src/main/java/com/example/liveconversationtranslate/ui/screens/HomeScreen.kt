@@ -12,7 +12,11 @@ import androidx.compose.ui.unit.sp
 fun HomeScreen(
     modifier: Modifier = Modifier,
     speechText: String,
-    onStartTranslation: () ->Unit
+    translatedText: String,
+    sourceLanguage: String,
+    targetLanguage: String,
+    onStartTranslation: () ->Unit,
+    onStopTranslation: () -> Unit
 ) {
 
     Column(
@@ -38,10 +42,25 @@ fun HomeScreen(
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = speechText,
+            Column(
                 modifier = Modifier.padding(16.dp)
-            )
+            ) {
+
+                Text("🗣 Recognized Speech")
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = speechText)
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text("🌍 Translation")
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = translatedText)
+
+            }
         }
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -56,9 +75,9 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = {
+            onClick = onStopTranslation
                 // Stop Listening
-            }
+
         ) {
             Text("Stop")
         }
