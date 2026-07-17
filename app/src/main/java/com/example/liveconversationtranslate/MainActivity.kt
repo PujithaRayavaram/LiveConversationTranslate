@@ -1,5 +1,6 @@
 package com.example.liveconversationtranslate
 
+import com.example.liveconversationtranslate.service.SpeechService
 import com.example.liveconversationtranslate.language.LanguageRepository
 import android.speech.SpeechRecognizer
 import android.speech.RecognitionListener
@@ -29,11 +30,12 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
 
-    private var speechText by mutableStateOf("Waiting for speech...")
+    private var speechText by mutableStateOf("")
     private var selectedSourceLanguage by mutableStateOf(LanguageRepository.languages[0])
     private var selectedTargetLanguage by mutableStateOf(LanguageRepository.languages[1])
 
-    private var translatedText by mutableStateOf("Translation will appear here...")
+    private var translatedText by mutableStateOf("")
+
 
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var speechIntent: Intent
@@ -71,6 +73,14 @@ class MainActivity : ComponentActivity() {
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE,
+                selectedSourceLanguage.code
+            )
+            putExtra(
+                RecognizerIntent.EXTRA_PARTIAL_RESULTS,
+                        true
+            )
         }
 
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
@@ -102,28 +112,41 @@ class MainActivity : ComponentActivity() {
                     ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     ?.get(0)
 
-                if (text != null) {
+                if(text !=null ){
+                        speechText = text
 
-                    speechText = text
 
                     translatorManager.translate(
                         text = text,
                         sourceLanguage = selectedSourceLanguage.code,
                         targetLanguage = selectedTargetLanguage.code,
                         onSuccess = { translated ->
-                            translatedText = translated
+                                translatedText = translated
                         },
-                        onFailure = {
+                        onFailure = { e ->
+                            android.util.Log.e("TRANSLATOR",e.toString())
                             translatedText = "Translation Failed"
                         }
                     )
 
                 }
+                if (isListening) {
+                    speechRecognizer.startListening(speechIntent)
+                }
 
 
             }
 
-            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onPartialResults(partialResults: Bundle?) {
+
+                val partialText = partialResults
+                    ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    ?.getOrNull(0)
+
+                if (partialText != null) {
+                    speechText = partialText
+                }
+            }
 
             override fun onEvent(eventType: Int, params: Bundle?) {}
         })
@@ -140,18 +163,60 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         speechText = speechText,
                         translatedText = translatedText,
-                        sourceLanguage = selectedSourceLanguage.name,
-                        targetLanguage = selectedTargetLanguage.name,
+                        sourceLanguage = selectedSourceLanguage,
+                        targetLanguage = selectedTargetLanguage,
+                        languages = LanguageRepository.languages,
+                        onSourceLanguageChange = { language ->
+                            selectedSourceLanguage = language
+                            speechIntent.putExtra(
+                                RecognizerIntent.EXTRA_LANGUAGE,language.code
+                            )
+                        },
+
+                        onTargetLanguageChange = { language ->
+                            selectedTargetLanguage = language
+                        },
+
+                        onSwapLanguages = {
+
+                            val temp = selectedSourceLanguage
+                            selectedSourceLanguage = selectedTargetLanguage
+                            selectedTargetLanguage = temp
+
+                            speechIntent.apply {
+                                putExtra(
+                                    RecognizerIntent.EXTRA_LANGUAGE,
+                                    selectedSourceLanguage.code
+                                )
+                                putExtra(
+                                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                )
+                            }
+                        },
+
                         onStartTranslation = {
+
                             isListening = true
 
-                                speechRecognizer.startListening(speechIntent)
+                            startService(
+                                Intent(this, SpeechService::class.java)
+                            )
+
+                            speechRecognizer.startListening(speechIntent)
+
                         },
                         onStopTranslation = {
-                            isListening = false
-                            speechRecognizer.stopListening()
-                        }
 
+                            isListening = false
+
+                            speechRecognizer.stopListening()
+
+                            stopService(
+                                Intent(this, SpeechService::class.java)
+                            )
+
+                        },
                     )
 
                 }

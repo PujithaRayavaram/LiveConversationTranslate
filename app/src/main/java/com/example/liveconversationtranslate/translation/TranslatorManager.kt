@@ -22,17 +22,20 @@ class TranslatorManager {
         val translator = Translation.getClient(options)
 
         val conditions = DownloadConditions.Builder()
-            .requireWifi()
             .build()
 
         translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
+                android.util.Log.d("TRANSLATOR","Model Downloaded Successfully")
 
+                android.util.Log.d("TRANSLATOR","Starting Translation")
                 translator.translate(text)
                     .addOnSuccessListener { translatedText ->
+                        android.util.Log.d("TRANSLATOR","Translated = $translatedText")
                         onSuccess(translatedText)
                     }
                     .addOnFailureListener { exception ->
+                        android.util.Log.e("TRANSLATOR",exception.toString())
                         onFailure(exception)
                     }
 
