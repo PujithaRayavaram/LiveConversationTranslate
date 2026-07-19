@@ -95,3 +95,18 @@ Date: 17-07-2026
 - Improved app structure for future language selection
 
 Status: ✅ Completed
+
+
+## Version 0.9 - Completed ✅
+
+Date: 17-07-2026
+
+### Features
+- Added Foreground Service
+- Added persistent notification
+- Improved speech recognition workflow
+- Tested application on a real Android device
+- Added language swapping
+- Improved application stability
+
+Status: ✅ Completed

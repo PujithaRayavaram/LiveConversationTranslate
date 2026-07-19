@@ -1,10 +1,13 @@
 package com.example.liveconversationtranslate
 
+
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.example.liveconversationtranslate.translation.GeminiTranslator
 import com.example.liveconversationtranslate.service.SpeechService
 import com.example.liveconversationtranslate.language.LanguageRepository
 import android.speech.SpeechRecognizer
 import android.speech.RecognitionListener
-import com.example.liveconversationtranslate.translation.TranslatorManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -41,7 +44,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var speechIntent: Intent
     private var isListening = false
 
-    private val translatorManager = TranslatorManager()
+    private val geminiTranslator = GeminiTranslator()
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -116,16 +119,23 @@ class MainActivity : ComponentActivity() {
                         speechText = text
 
 
-                    translatorManager.translate(
+                    geminiTranslator.translate(
                         text = text,
-                        sourceLanguage = selectedSourceLanguage.code,
-                        targetLanguage = selectedTargetLanguage.code,
+                        targetLanguage = selectedTargetLanguage.name,
                         onSuccess = { translated ->
+
+                            runOnUiThread {
                                 translatedText = translated
+                            }
+
                         },
                         onFailure = { e ->
-                            android.util.Log.e("TRANSLATOR",e.toString())
-                            translatedText = "Translation Failed"
+
+                            runOnUiThread {
+                                translatedText = e.message ?: "Translation Failed"
+                            }
+
+                            android.util.Log.e("GEMINI", "Error", e)
                         }
                     )
 

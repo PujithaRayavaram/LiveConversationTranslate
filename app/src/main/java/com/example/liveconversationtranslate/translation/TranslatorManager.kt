@@ -23,7 +23,7 @@ class TranslatorManager {
 
         val conditions = DownloadConditions.Builder()
             .build()
-
+        android.util.Log.d("TRANSLATOR", "Downloading model...")
         translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
                 android.util.Log.d("TRANSLATOR","Model Downloaded Successfully")
@@ -41,6 +41,12 @@ class TranslatorManager {
 
             }
             .addOnFailureListener { exception ->
+
+                android.util.Log.e(
+                    "TRANSLATOR",
+                    "MODEL DOWNLOAD FAILED: ${exception.message}"
+                )
+
                 onFailure(exception)
             }
     }
