@@ -1,9 +1,7 @@
 package com.example.liveconversationtranslate
 
 
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import com.example.liveconversationtranslate.translation.GeminiTranslator
+import com.example.liveconversationtranslate.translation.TranslatorManager
 import com.example.liveconversationtranslate.service.SpeechService
 import com.example.liveconversationtranslate.language.LanguageRepository
 import android.speech.SpeechRecognizer
@@ -44,7 +42,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var speechIntent: Intent
     private var isListening = false
 
-    private val geminiTranslator = GeminiTranslator()
+    private val translatorManager = TranslatorManager()
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -109,19 +107,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            override fun onResults(results: Bundle?) {
 
+            override fun onResults(results: Bundle?) {
                 val text = results
                     ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     ?.get(0)
 
                 if(text !=null ){
                         speechText = text
-
-
-                    geminiTranslator.translate(
+                    android.util.Log.d("MAIN", "Recognized = $text")
+                    android.util.Log.d("MAIN", "Calling TranslatorManager")
+                    translatorManager.translate(
                         text = text,
-                        targetLanguage = selectedTargetLanguage.name,
+                        sourceLanguage = selectedSourceLanguage.code,
+                        targetLanguage = selectedTargetLanguage.code,
                         onSuccess = { translated ->
 
                             runOnUiThread {
@@ -129,13 +128,16 @@ class MainActivity : ComponentActivity() {
                             }
 
                         },
-                        onFailure = { e ->
+                        onFailure = { exception ->
 
                             runOnUiThread {
-                                translatedText = e.message ?: "Translation Failed"
+                                translatedText = "Translation Failed"
                             }
 
-                            android.util.Log.e("GEMINI", "Error", e)
+                            android.util.Log.e(
+                                "TRANSLATOR",
+                                exception.toString()
+                            )
                         }
                     )
 
