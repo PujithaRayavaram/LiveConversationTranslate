@@ -111,40 +111,103 @@ Date: 17-07-2026
 
 Status: ✅ Completed
 
-# Version 1.0 - Multi-Language Translation Working
+# 🚀 LiveConversationTranslate - Project Progress
 
-## Date
+## Version 1.0 (Completed) ✅
+
+### Date
 22 July 2026
 
-## Features Completed
-- Speech Recognition using Android SpeechRecognizer
-- Real-time speech capture
-- Language selection (English, Telugu, Hindi, Tamil, Kannada)
-- Language swap functionality
+### Features Completed
+- Android SpeechRecognizer
+- Live Speech Recognition
+- Source Language Selection
+- Target Language Selection
+- Language Swap
 - Google ML Kit Translation
-- Foreground Service for continuous listening
+- Real-time Translation Display
+- Foreground Service
+- Runtime Permission Handling
 - Material 3 Compose UI
-- Runtime microphone permission
-- Translation result displayed on screen
 
-## Testing
-✅ Successfully tested on Redmi Note 14 5G (Android 15)
+### Successfully Tested
+✅ Redmi Note 14 5G (Android 15)
 
-Working:
-- English → Telugu
-- English → Hindi
-- English → Tamil
-- English → Kannada
-- Telugu → English
-- Hindi → Telugu
-- Tamil → Hindi
+### Current Status
+The application successfully translates between multiple languages.
 
-## Known Issue
-Translation model download does not work on my iQOO device. The application works correctly on Redmi Note 14 5G, indicating a device-specific issue.
+### Known Issue
+- Translation model download does not work on my iQOO device.
+- Works correctly on Redmi Note 14 5G.
 
-## Next Version (v1.1)
-- Quick Settings Tile
-- Continuous Conversation Mode
-- Better Error Handling
-- Translation History
-- Download language models automatically
+---
+
+# 📅 Development Roadmap
+
+## Version 1.1
+### Quick Settings Tile
+- Add Quick Settings Tile
+- Start translation directly from Quick Settings
+- Stop translation from Quick Settings
+
+---
+
+## Version 1.2
+### Continuous Conversation Mode
+- Continuous speech recognition
+- Automatic restart after each sentence
+- Faster translation updates
+
+---
+
+## Version 1.3
+### Pronunciation Assistant ⭐ (New Feature)
+
+Purpose:
+Help users pronounce translated text correctly.
+
+Features:
+- Show pronunciation (Romanized text)
+- Separate pronunciation language selection
+- One-tap audio pronunciation
+- Native Text-to-Speech playback
+
+Example:
+
+Recognized Speech:
+Hello
+
+Translation:
+こんにちは
+
+Pronunciation:
+Kon-ni-chi-wa
+
+🔊 Play Pronunciation
+
+---
+
+## Version 1.4
+### Translation History
+- Save previous translations
+- Search history
+- Copy translation
+- Favorite translations
+
+---
+
+## Version 1.5
+### Offline Improvements
+- Automatic language model download
+- Download manager
+- Offline status indicator
+
+---
+
+## Version 2.0
+### AI Conversation Assistant
+
+- Two-way conversation mode
+- Smart language detection
+- Context-aware translation
+- Natural AI translation improvements

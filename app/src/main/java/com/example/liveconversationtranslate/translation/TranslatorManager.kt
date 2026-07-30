@@ -2,9 +2,12 @@ package com.example.liveconversationtranslate.translation
 
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.translate.Translation
+import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
 
 class TranslatorManager {
+
+    private var translator: Translator? = null
 
     fun translate(
         text: String,
@@ -13,46 +16,43 @@ class TranslatorManager {
         onSuccess: (String) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        android.util.Log.d("TRANSLATOR", "translate() called")
-        android.util.Log.d("TRANSLATOR", "Input Text = $text")
+
+        if (sourceLanguage == targetLanguage) {
+            onSuccess(text)
+            return
+        }
+
+        translator?.close()
 
         val options = TranslatorOptions.Builder()
             .setSourceLanguage(sourceLanguage)
             .setTargetLanguage(targetLanguage)
             .build()
 
-        val translator = Translation.getClient(options)
-        android.util.Log.d(
-            "TRANSLATOR",
-            "Source = $sourceLanguage  Target = $targetLanguage"
-        )
+        translator = Translation.getClient(options)
 
-        val conditions = DownloadConditions.Builder()
-
-            .build()
-        android.util.Log.d("TRANSLATOR", "Downloading model...")
-
-        translator.downloadModelIfNeeded(conditions)
+        translator!!
+            .downloadModelIfNeeded(
+                DownloadConditions.Builder().build()
+            )
             .addOnSuccessListener {
-                android.util.Log.d("TRANSLATOR", "Model downloaded")
 
-                translator.translate(text)
+                translator!!
+                    .translate(text)
                     .addOnSuccessListener { translatedText ->
-
-                        android.util.Log.d("TRANSLATOR", "Translation = $translatedText")
                         onSuccess(translatedText)
                     }
-                    .addOnFailureListener { exception ->
-
-                        android.util.Log.e("TRANSLATOR", "Translate failed", exception)
-                        onFailure(exception)
+                    .addOnFailureListener {
+                        onFailure(it)
                     }
 
             }
-            .addOnFailureListener { exception ->
-
-                android.util.Log.e("TRANSLATOR", "Model download failed", exception)
-                onFailure(exception)
+            .addOnFailureListener {
+                onFailure(it)
             }
+    }
+
+    fun close() {
+        translator?.close()
     }
 }

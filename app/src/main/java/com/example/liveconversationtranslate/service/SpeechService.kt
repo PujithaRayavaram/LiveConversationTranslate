@@ -25,8 +25,8 @@ class SpeechService : Service() {
         val notification: Notification =
             NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("🎤 Live Conversation Translate")
-                .setContentText("Listening for speech...")
+                .setContentTitle("🎤 Live Translate")
+                .setContentText("Listening...")
                 .setOngoing(true)
                 .build()
 
@@ -38,12 +38,12 @@ class SpeechService : Service() {
         flags: Int,
         startId: Int
     ): Int {
-
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -54,7 +54,7 @@ class SpeechService : Service() {
 
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Live Translation Service",
+                "Live Translation",
                 NotificationManager.IMPORTANCE_LOW
             )
 

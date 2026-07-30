@@ -21,6 +21,17 @@
             android:name=".service.SpeechService"
             android:exported="false"
             android:foregroundServiceType="microphone"/>
+        <service
+            android:name=".service.TranslationTileService"
+            android:label="Live Translate"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

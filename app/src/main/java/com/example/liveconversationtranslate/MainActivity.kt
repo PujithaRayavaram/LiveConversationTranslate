@@ -1,6 +1,8 @@
 package com.example.liveconversationtranslate
 
 
+import android.os.Handler
+import android.os.Looper
 import com.example.liveconversationtranslate.translation.TranslatorManager
 import com.example.liveconversationtranslate.service.SpeechService
 import com.example.liveconversationtranslate.language.LanguageRepository
@@ -41,6 +43,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var speechIntent: Intent
     private var isListening = false
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val stopRunnable = Runnable {
+        stopTranslation()
+    }
 
     private val translatorManager = TranslatorManager()
 
@@ -58,6 +65,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val startFromTile = intent.getBooleanExtra(
+            "START_TRANSLATION",
+            false
+        )
 
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -84,6 +96,7 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
 
             override fun onReadyForSpeech(params: Bundle?) {}
@@ -100,8 +113,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
             override fun onError(error: Int) {
-                if (isListening && error == SpeechRecognizer.ERROR_NO_MATCH ||
-                    error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                if (
+                    isListening &&
+                    (
+                            error == SpeechRecognizer.ERROR_NO_MATCH ||
+                                    error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                            )
                 ) {
                     speechRecognizer.startListening(speechIntent)
                 }
@@ -115,6 +132,8 @@ class MainActivity : ComponentActivity() {
 
                 if(text !=null ){
                         speechText = text
+                    handler.removeCallbacks(stopRunnable)
+                    handler.postDelayed(stopRunnable, 15000)
                     android.util.Log.d("MAIN", "Recognized = $text")
                     android.util.Log.d("MAIN", "Calling TranslatorManager")
                     translatorManager.translate(
@@ -156,7 +175,11 @@ class MainActivity : ComponentActivity() {
                     ?.getOrNull(0)
 
                 if (partialText != null) {
+
                     speechText = partialText
+
+                    handler.removeCallbacks(stopRunnable)
+                    handler.postDelayed(stopRunnable, 15000)
                 }
             }
 
@@ -195,44 +218,66 @@ class MainActivity : ComponentActivity() {
                             selectedSourceLanguage = selectedTargetLanguage
                             selectedTargetLanguage = temp
 
-                            speechIntent.apply {
-                                putExtra(
-                                    RecognizerIntent.EXTRA_LANGUAGE,
-                                    selectedSourceLanguage.code
-                                )
-                                putExtra(
-                                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                                )
-                            }
+                            speechIntent.putExtra(
+                                RecognizerIntent.EXTRA_LANGUAGE,
+                                selectedSourceLanguage.code
+                            )
                         },
 
                         onStartTranslation = {
-
-                            isListening = true
-
-                            startService(
-                                Intent(this, SpeechService::class.java)
-                            )
-
-                            speechRecognizer.startListening(speechIntent)
-
+                            startTranslation()
                         },
+
                         onStopTranslation = {
+                            stopTranslation()
+                        }
 
-                            isListening = false
-
-                            speechRecognizer.stopListening()
-
-                            stopService(
-                                Intent(this, SpeechService::class.java)
-                            )
-
-                        },
                     )
 
                 }
             }
         }
+
+        if (startFromTile) {
+            startTranslation()
+        }
+
+    }
+
+    private fun startTranslation() {
+
+        isListening = true
+
+        startService(
+            Intent(this, SpeechService::class.java)
+        )
+
+        handler.removeCallbacks(stopRunnable)
+        handler.postDelayed(stopRunnable, 15000)
+
+        speechRecognizer.startListening(speechIntent)
+    }
+
+    private fun stopTranslation() {
+
+        isListening = false
+
+        handler.removeCallbacks(stopRunnable)
+
+        speechRecognizer.stopListening()
+
+        stopService(
+            Intent(this, SpeechService::class.java)
+        )
+
+        android.util.Log.d("MAIN", "Translation Stopped")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        speechRecognizer.destroy()
+        translatorManager.close()
+        handler.removeCallbacks(stopRunnable)
     }
 }
