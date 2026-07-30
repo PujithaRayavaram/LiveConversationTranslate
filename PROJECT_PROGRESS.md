@@ -211,3 +211,52 @@ Kon-ni-chi-wa
 - Smart language detection
 - Context-aware translation
 - Natural AI translation improvements
+
+# 🚀 Version 1.1 (Completed)
+
+## ✅ Features Implemented
+
+- Added Google ML Kit multi-language translation.
+- Supports translation between any supported source and target languages.
+- Integrated Android SpeechRecognizer for live speech recognition.
+- Displays recognized speech and translated text in real time.
+- Added Quick Settings Tile (Live Translate).
+- Tapping the Quick Settings Tile launches the application directly.
+- Translation can be started manually from the application.
+- Added manual Stop Translation functionality.
+- Implemented automatic inactivity timeout.
+- Translation automatically stops after 15 seconds of no speech.
+- Timer resets whenever new speech is detected.
+- Improved SpeechRecognizer lifecycle management.
+- Added proper cleanup in `onDestroy()`.
+- Successfully tested on a physical Android device (Redmi Note 14 5G, Android 15).
+- Project successfully pushed to GitHub.
+
+---
+
+# 🎯 Version 1.2 (Planned)
+
+## Pronunciation Assistant
+
+### Goals
+
+- Generate a readable pronunciation (romanized text) for translated sentences.
+- Allow users to read translated text even if they cannot read the target script.
+- Example:
+
+Original:
+I had lunch
+
+Translation:
+నేను భోజనం చేశాను
+
+Pronunciation:
+Nenu bojanam chesaanu
+
+### Upcoming Features
+
+- 📖 Pronunciation section below translated text.
+- 🔊 Speaker button to hear native pronunciation.
+- 🌍 Pronunciation language selection (where supported).
+- Better UI for pronunciation and speech playback.
+- Continue improving the app as a real-time conversation assistant.
