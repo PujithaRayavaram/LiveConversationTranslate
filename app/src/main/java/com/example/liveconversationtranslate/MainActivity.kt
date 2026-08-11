@@ -1,6 +1,9 @@
 package com.example.liveconversationtranslate
 
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.example.liveconversationtranslate.translation.ReadingAssistantManager
 import android.os.Handler
 import android.os.Looper
 import com.example.liveconversationtranslate.translation.TranslatorManager
@@ -30,14 +33,22 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import com.example.liveconversationtranslate.pronunciation.PronunciationManager
 
 class MainActivity : ComponentActivity() {
 
     private var speechText by mutableStateOf("")
     private var selectedSourceLanguage by mutableStateOf(LanguageRepository.languages[0])
     private var selectedTargetLanguage by mutableStateOf(LanguageRepository.languages[1])
+    private var selectedReadingLanguage by mutableStateOf(
+        LanguageRepository.languages[0]
+    )
 
     private var translatedText by mutableStateOf("")
+    private var readingText by mutableStateOf("")
+    private var pronunciationText by mutableStateOf("")
+
+    private lateinit var pronunciationManager: PronunciationManager
 
 
     private lateinit var speechRecognizer: SpeechRecognizer
@@ -50,6 +61,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private val translatorManager = TranslatorManager()
+
+
+    private val readingAssistantManager = ReadingAssistantManager()
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -64,6 +78,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        pronunciationManager = PronunciationManager(this)
         enableEdgeToEdge()
 
         val startFromTile = intent.getBooleanExtra(
@@ -142,9 +158,22 @@ class MainActivity : ComponentActivity() {
                         targetLanguage = selectedTargetLanguage.code,
                         onSuccess = { translated ->
 
-                            runOnUiThread {
-                                translatedText = translated
+                            lifecycleScope.launch {
+
+                                val reading = readingAssistantManager.getReadingText(
+                                    translatedText = translated,
+                                    translatedLanguageCode = selectedTargetLanguage.code,
+                                    readingLanguageCode = selectedReadingLanguage.code
+                                )
+
+                                runOnUiThread {
+
+                                    translatedText = translated
+                                    readingText = reading
+
+                                }
                             }
+
 
                         },
                         onFailure = { exception ->
@@ -198,6 +227,8 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         speechText = speechText,
                         translatedText = translatedText,
+                        readingText= readingText,
+                        readingLanguages = LanguageRepository.languages,
                         sourceLanguage = selectedSourceLanguage,
                         targetLanguage = selectedTargetLanguage,
                         languages = LanguageRepository.languages,
@@ -211,6 +242,10 @@ class MainActivity : ComponentActivity() {
                         onTargetLanguageChange = { language ->
                             selectedTargetLanguage = language
                         },
+
+                        onReadingLanguageChange = { language ->
+                            selectedReadingLanguage = language
+                        }
 
                         onSwapLanguages = {
 
@@ -230,7 +265,14 @@ class MainActivity : ComponentActivity() {
 
                         onStopTranslation = {
                             stopTranslation()
-                        }
+                        },
+                        onSpeakPronunciation = {
+                            pronunciationManager.speak(
+                                translatedText,
+                                selectedTargetLanguage.code
+                            )
+                        },
+
 
                     )
 
@@ -278,6 +320,7 @@ class MainActivity : ComponentActivity() {
 
         speechRecognizer.destroy()
         translatorManager.close()
+        pronunciationManager.shutdown()
         handler.removeCallbacks(stopRunnable)
     }
 }
