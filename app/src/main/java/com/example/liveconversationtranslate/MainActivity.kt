@@ -1,52 +1,46 @@
 package com.example.liveconversationtranslate
 
 
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import com.example.liveconversationtranslate.translation.ReadingAssistantManager
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import com.example.liveconversationtranslate.translation.TranslatorManager
-import com.example.liveconversationtranslate.service.SpeechService
-import com.example.liveconversationtranslate.language.LanguageRepository
-import android.speech.SpeechRecognizer
 import android.speech.RecognitionListener
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-
-import android.app.Activity
-import android.content.Intent
 import android.speech.RecognizerIntent
-
-import android.os.Bundle
+import android.speech.SpeechRecognizer
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.liveconversationtranslate.language.LanguageRepository
+import com.example.liveconversationtranslate.pronunciation.PronunciationManager
+import com.example.liveconversationtranslate.service.SpeechService
+import com.example.liveconversationtranslate.translation.ReadingAssistantManager
+import com.example.liveconversationtranslate.translation.TranslatorManager
 import com.example.liveconversationtranslate.ui.screens.HomeScreen
 import com.example.liveconversationtranslate.ui.theme.LiveConversationTranslateTheme
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import com.example.liveconversationtranslate.pronunciation.PronunciationManager
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private var speechText by mutableStateOf("")
     private var selectedSourceLanguage by mutableStateOf(LanguageRepository.languages[0])
     private var selectedTargetLanguage by mutableStateOf(LanguageRepository.languages[1])
-    private var selectedReadingLanguage by mutableStateOf(
-        LanguageRepository.languages[0]
-    )
+
 
     private var translatedText by mutableStateOf("")
     private var readingText by mutableStateOf("")
-    private var pronunciationText by mutableStateOf("")
 
     private lateinit var pronunciationManager: PronunciationManager
 
@@ -162,8 +156,7 @@ class MainActivity : ComponentActivity() {
 
                                 val reading = readingAssistantManager.getReadingText(
                                     translatedText = translated,
-                                    translatedLanguageCode = selectedTargetLanguage.code,
-                                    readingLanguageCode = selectedReadingLanguage.code
+                                    translatedLanguageCode = selectedTargetLanguage.code
                                 )
 
                                 runOnUiThread {
@@ -228,7 +221,6 @@ class MainActivity : ComponentActivity() {
                         speechText = speechText,
                         translatedText = translatedText,
                         readingText= readingText,
-                        readingLanguages = LanguageRepository.languages,
                         sourceLanguage = selectedSourceLanguage,
                         targetLanguage = selectedTargetLanguage,
                         languages = LanguageRepository.languages,
@@ -243,9 +235,6 @@ class MainActivity : ComponentActivity() {
                             selectedTargetLanguage = language
                         },
 
-                        onReadingLanguageChange = { language ->
-                            selectedReadingLanguage = language
-                        }
 
                         onSwapLanguages = {
 
@@ -269,7 +258,7 @@ class MainActivity : ComponentActivity() {
                         onSpeakPronunciation = {
                             pronunciationManager.speak(
                                 translatedText,
-                                selectedTargetLanguage.code
+                               "en"
                             )
                         },
 

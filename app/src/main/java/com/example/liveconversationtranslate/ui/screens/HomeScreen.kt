@@ -78,9 +78,6 @@ fun HomeScreen(
     translatedText: String,
 
     readingText: String,
-    readingLanguage: Language,
-    readingLanguages: List<Language>,
-    onReadingLanguageChange: (Language) -> Unit,
 
     sourceLanguage: Language,
     targetLanguage: Language,
@@ -216,12 +213,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                LanguageDropdown(
-                    label = "Reading Language",
-                    selectedLanguage = readingLanguage,
-                    languages = readingLanguages,
-                    onLanguageSelected = onReadingLanguageChange
-                )
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
