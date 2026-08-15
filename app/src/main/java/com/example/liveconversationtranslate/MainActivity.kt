@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     private var speechText by mutableStateOf("")
+    private var textInput by mutableStateOf("")
     private var selectedSourceLanguage by mutableStateOf(LanguageRepository.languages[0])
     private var selectedTargetLanguage by mutableStateOf(LanguageRepository.languages[1])
 
@@ -69,6 +70,50 @@ class MainActivity : ComponentActivity() {
                 println("Microphone Permission Denied")
             }
         }
+
+    private fun translateTextInput() {
+
+        if (textInput.isBlank()) {
+            return
+        }
+
+        translatorManager.translate(
+            text = textInput,
+            sourceLanguage = selectedSourceLanguage.code,
+            targetLanguage = selectedTargetLanguage.code,
+
+            onSuccess = { translated ->
+
+                lifecycleScope.launch {
+
+                    val reading =
+                        readingAssistantManager.getReadingText(
+                            translatedText = translated,
+                            translatedLanguageCode = selectedTargetLanguage.code
+                        )
+
+                    runOnUiThread {
+
+                        translatedText = translated
+                        readingText = reading
+                    }
+                }
+            },
+
+            onFailure = { exception ->
+
+                runOnUiThread {
+                    translatedText = "Translation Failed"
+                    readingText = ""
+                }
+
+                android.util.Log.e(
+                    "TEXT_TRANSLATOR",
+                    exception.toString()
+                )
+            }
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -219,6 +264,15 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(
                         modifier = Modifier.padding(innerPadding),
                         speechText = speechText,
+                        textInput = textInput,
+
+                        onTextInputChange = { text ->
+                            textInput = text
+                        },
+
+                        onTranslateText = {
+                            translateTextInput()
+                        },
                         translatedText = translatedText,
                         readingText= readingText,
                         sourceLanguage = selectedSourceLanguage,

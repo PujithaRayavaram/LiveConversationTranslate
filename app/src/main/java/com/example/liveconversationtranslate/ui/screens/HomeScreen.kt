@@ -75,6 +75,9 @@ fun LanguageDropdown(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     speechText: String,
+    textInput: String,
+    onTextInputChange: (String) -> Unit,
+    onTranslateText: () -> Unit,
     translatedText: String,
 
     readingText: String,
@@ -110,6 +113,46 @@ fun HomeScreen(
         Text(
             text = "Understand any language in real time"
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text = "⌨️ Text Input",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedTextField(
+                    value = textInput,
+                    onValueChange = onTextInputChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text("Enter text")
+                    },
+                    placeholder = {
+                        Text("Type something to translate...")
+                    },
+                    minLines = 3
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = onTranslateText,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("🌐 Translate Text")
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(30.dp))
 

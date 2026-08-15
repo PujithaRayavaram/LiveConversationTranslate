@@ -257,6 +257,78 @@ Nenu bojanam chesaanu
 
 - 📖 Pronunciation section below translated text.
 - 🔊 Speaker button to hear native pronunciation.
-- 🌍 Pronunciation language selection (where supported).
 - Better UI for pronunciation and speech playback.
 - Continue improving the app as a real-time conversation assistant.
+
+## Version 1.3– Reading Assistant & Pronunciation Feature ✅
+
+### Completed
+- Added Reading Assistant to the translation screen.
+- Added automatic transliteration of translated text into Latin/English letters.
+- Removed Reading Language selection to keep the feature simple and user-friendly.
+- Added "How to Read" section below the translated text.
+- Added Voice Assistant button 🔊 for the pronunciation/reading text.
+- Voice Assistant successfully speaks the generated reading text.
+- Made the Home Screen vertically scrollable.
+- Connected Reading Assistant with the translation result.
+- Reading text automatically updates whenever a new translation is generated.
+- Added 15-second automatic listening timeout.
+- Added proper Start Translation and Stop Translation handling.
+- Fixed Gradle cache/build issues.
+- Project builds successfully. ✅
+
+### Current Flow
+
+Speech Input 🎤
+↓
+Speech Recognition
+↓
+Translation 🌍
+↓
+How to Read 📖
+↓
+English/Latin Pronunciation
+↓
+Voice Assistant 🔊
+
+### Current Status
+Build: SUCCESSFUL ✅
+Reading Assistant: WORKING ✅
+Voice Assistant: WORKING ✅
+Translation: WORKING ✅
+Speech Recognition: WORKING ✅
+Scrolling: WORKING ✅
+GitHub Backup: COMPLETED ✅
+
+## Version 1.4– Text Input Support ✅
+
+### Completed
+- Added text input field to the application.
+- Added manual text translation.
+- Connected text input to the existing TranslatorManager.
+- Reused the existing Reading Assistant for text translations.
+- Reused the existing Voice Assistant for translated reading.
+- Voice input and text input now use the same translation pipeline.
+- Maintained source and target language selection.
+- Maintained English-letter "How to Read" output.
+
+### Current Input Modes
+- 🎤 Voice Input ✅
+- ⌨️ Text Input ✅
+
+### Current Flow
+
+Voice Input 🎤 ──┐
+├──> Translation 🌍
+Text Input ⌨️ ───┘
+↓
+How to Read 📖
+↓
+Voice Assistant 🔊
+
+### Current Status
+Build: SUCCESSFUL ✅
+Voice Translation: WORKING ✅
+Text Translation: WORKING ✅
+Reading Assistant: WORKING ✅
+Voice Assistant: WORKING ✅
