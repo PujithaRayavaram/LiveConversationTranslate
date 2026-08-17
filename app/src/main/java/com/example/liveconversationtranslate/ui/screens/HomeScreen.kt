@@ -1,5 +1,10 @@
 package com.example.liveconversationtranslate.ui.screens
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import android.net.Uri
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
@@ -20,7 +25,9 @@ fun LanguageDropdown(
     selectedLanguage: Language,
     languages: List<Language>,
     onLanguageSelected: (Language) -> Unit
-) {
+)
+
+{
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -72,10 +79,37 @@ fun LanguageDropdown(
 }
 
 @Composable
+fun SelectedImage(
+    imageUri: Uri?
+) {
+    if (imageUri == null) return
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    val bitmap = remember(imageUri) {
+        context.contentResolver.openInputStream(imageUri)?.use {
+            BitmapFactory.decodeStream(it)
+        }
+    }
+
+    if (bitmap != null) {
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = "Selected image",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp),
+            contentScale = ContentScale.Fit
+        )
+    }
+}
+
+@Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     speechText: String,
     textInput: String,
+    imageUri: Uri?,
     onTextInputChange: (String) -> Unit,
     onTranslateText: () -> Unit,
     translatedText: String,
@@ -93,7 +127,8 @@ fun HomeScreen(
     onStartTranslation: () -> Unit,
     onStopTranslation: () -> Unit,
 
-    onSpeakPronunciation: () -> Unit
+    onSpeakPronunciation: () -> Unit,
+    onGalleryClick: () ->Unit
 ) {
 
     Column(
@@ -291,6 +326,53 @@ fun HomeScreen(
             }
         }
 
+
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text = "🖼️ Image Translation",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    Button(
+                        onClick = {
+                            // Camera will be connected in the next step
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("📷 Camera")
+                    }
+
+                    Button(
+                        onClick = onGalleryClick,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("🖼️ Gallery")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                SelectedImage(
+                    imageUri = imageUri 
+                )
+
+
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
         Spacer(modifier = Modifier.height(30.dp))
 
         // -----------------------------

@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("com.google.mlkit:translate:17.0.3")
     implementation(libs.androidx.core.ktx)

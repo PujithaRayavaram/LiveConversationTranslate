@@ -1,6 +1,7 @@
 package com.example.liveconversationtranslate
 
 
+import com.example.liveconversationtranslate.translation.ImageTextRecognizer
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -43,6 +44,9 @@ class MainActivity : ComponentActivity() {
     private var translatedText by mutableStateOf("")
     private var readingText by mutableStateOf("")
 
+    private var selectedImageUri by mutableStateOf<android.net.Uri?>(null)
+
+
     private lateinit var pronunciationManager: PronunciationManager
 
 
@@ -56,9 +60,50 @@ class MainActivity : ComponentActivity() {
     }
 
     private val translatorManager = TranslatorManager()
+    private lateinit var imageTextRecognizer: ImageTextRecognizer
 
 
     private val readingAssistantManager = ReadingAssistantManager()
+
+    private val galleryLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri ->
+
+            if (uri != null) {
+
+                selectedImageUri = uri
+
+                imageTextRecognizer.recognizeText(
+                    imageUri = uri,
+
+                    onSuccess = { text ->
+
+                        runOnUiThread {
+
+                        }
+
+                        android.util.Log.d(
+                            "IMAGE_OCR",
+                            "Extracted Text = $text"
+                        )
+                    },
+
+                    onFailure = { exception ->
+
+                        runOnUiThread {
+
+
+                        }
+
+                        android.util.Log.e(
+                            "IMAGE_OCR",
+                            exception.toString()
+                        )
+                    }
+                )
+            }
+        }
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -117,6 +162,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        imageTextRecognizer = ImageTextRecognizer(this)
 
         pronunciationManager = PronunciationManager(this)
         enableEdgeToEdge()
@@ -265,6 +311,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         speechText = speechText,
                         textInput = textInput,
+                        imageUri = selectedImageUri,
 
                         onTextInputChange = { text ->
                             textInput = text
@@ -315,7 +362,9 @@ class MainActivity : ComponentActivity() {
                                "en"
                             )
                         },
-
+                        onGalleryClick = {
+                            galleryLauncher.launch("image/*")
+                        },
 
                     )
 
@@ -364,6 +413,7 @@ class MainActivity : ComponentActivity() {
         speechRecognizer.destroy()
         translatorManager.close()
         pronunciationManager.shutdown()
+        imageTextRecognizer.close()
         handler.removeCallbacks(stopRunnable)
     }
 }
